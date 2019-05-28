@@ -19,13 +19,7 @@ object Slides extends JSApp {
 
   val meAndIadvize = chapter(
     chapterSlide(
-      <.img(
-        ^.src := "./img/iadvize-logo.png",
-        ^.minHeight := "50%",
-        ^.maxHeight := "50%",
-        ^.minWidth := "50%",
-        ^.maxWidth := "50%"
-      )
+      <.h1("Self introduction")
     ),
     headerSlide(
       "iAdvize",
@@ -34,6 +28,13 @@ object Slides extends JSApp {
         Item.fadeIn("SaaS chat solution"),
         Item.fadeIn("Powerful targeting system"),
         Item.fadeIn("Largest websites in Europe ")
+      ),
+      <.img(
+        ^.src := "./img/iadvize-logo.png",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
       )
     ),
     headerSlide(
