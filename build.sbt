@@ -49,6 +49,13 @@ lazy val slides = project
     scalaJSUseMainModuleInitializer := true
   )
 
+lazy val compileSlides = taskKey[Unit]("Compile slides")
+compileSlides := {
+  (compile in (slides, Compile)).value
+  (fastOptJS in (slides, Compile)).value
+  (fullOptJS in (slides, Compile)).value
+}
+
 scalacOptions ++= Seq(
   "-deprecation",
   "-encoding", "UTF-8",

@@ -1,4 +1,3 @@
-
 import PresentationUtil._
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.vdom.html_<^._
@@ -11,25 +10,21 @@ object Slides extends JSApp {
 
   import Enumeration._
 
-  val chapter1 = chapter(
+  val introduction = chapter(
     chapterSlide(
-      <.h2("Build your presentations with ScalaJS + reveal.js"),
-      <.br,
-      <.h4("move down (down-arrow)")
+      <.h1("Request tracing in distributed systems"),
+      <.h2("A Kleisli tale")
     ),
-
     headerSlide(
       "reveal.js commands",
       <.p("Press 'f' to go full-screen and ESC to see an overview of your slides."),
       <.br,
       <.p("You can navigate to the right and down.")
     ),
-
     headerSlide(
       "My Header",
       <.h3("Headers everywhere")
     ),
-
     headerSlide(
       "Enumeration",
       Enumeration(
@@ -38,7 +33,6 @@ object Slides extends JSApp {
         Item.stable("I am also always here")
       )
     ),
-
     headerSlide(
       "Code, so much code",
       scalaC("""
@@ -52,17 +46,47 @@ object Slides extends JSApp {
         }
       """)
     ),
-
     noHeaderSlide(
       <.h3("Or have a blank slide")
     )
   )
 
-  val chapter2 = chapter(
+  val meAndIadvize = chapter(
     chapterSlide(
-      <.h2("Where can I find more information?")
+      <.img(
+        ^.src := "./img/iadvize-logo.png",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      )
     ),
+    headerSlide(
+      "iAdvize",
+      Enumeration(
+        Item.fadeIn("Based in Nantes"),
+        Item.fadeIn("SaaS chat solution"),
+        Item.fadeIn("Powerful targeting system"),
+        Item.fadeIn("Largest websites in Europe ")
+      )
+    ),
+    headerSlide(
+      "iAdvize",
+      <.h3("Much fun, such chat, so conversation"),
+      <.img(
+        ^.src := "./img/louis-chat.png",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      )
+    )
+  )
 
+  val microservicesArchitecture = chapter(
+    chapterSlide(
+      <.h1("Microservices architecture")
+    ),
     headerSlide(
       "about reveal.js",
       <.a(
@@ -70,7 +94,6 @@ object Slides extends JSApp {
         "reveal.js"
       )
     ),
-
     headerSlide(
       "about ScalaJS",
       <.a(
@@ -80,6 +103,37 @@ object Slides extends JSApp {
     )
   )
 
+  val solutions = chapter(
+    chapterSlide(
+      <.h2("Solutions ?")
+    )
+  )
+
+  val kleisli = chapter(
+    chapterSlide(
+      <.h2("Kleisli?")
+    ),
+    headerSlide(
+      "about reveal.js",
+      <.a(
+        ^.href := "https://github.com/hakimel/reveal.js/",
+        "reveal.js"
+      )
+    ),
+    headerSlide(
+      "about ScalaJS",
+      <.a(
+        ^.href := "https://www.scala-js.org",
+        "ScalaJS"
+      )
+    )
+  )
+
+  val summary = chapter(
+    chapterSlide(
+      <.h2("Wrap up")
+    )
+  )
   val Talk = ScalaComponent
     .builder[Unit]("Presentation")
     .renderStatic(
@@ -87,15 +141,18 @@ object Slides extends JSApp {
         ^.cls := "reveal",
         <.div(
           ^.cls := "slides",
-          chapter1,
-          chapter2
+          introduction,
+          meAndIadvize,
+          microservicesArchitecture,
+          solutions,
+          kleisli,
+          summary
         )
       )
     )
     .build
 
   @JSExport
-  override def main(): Unit = {
+  override def main(): Unit =
     Talk().renderIntoDOM(dom.document.body)
-  }
 }
