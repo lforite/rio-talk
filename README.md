@@ -1,4 +1,4 @@
-# Distributed request tracing - A Kleisli tale
+# Request tracing in microservices architecture - A Kleisli tale
 In modern architectures, the load and responsibilities are shared across many services. It can be hard to debug, at scale.
 In this presentation, we introduce a well known technique, i.e. using `Kleisli` as the main type to bring context to computations,
 in order to correlate log traces.

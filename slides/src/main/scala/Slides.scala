@@ -12,42 +12,8 @@ object Slides extends JSApp {
 
   val introduction = chapter(
     chapterSlide(
-      <.h1("Request tracing in distributed systems"),
+      <.h1("Request tracing in microservices architecture"),
       <.h2("A Kleisli tale")
-    ),
-    headerSlide(
-      "reveal.js commands",
-      <.p("Press 'f' to go full-screen and ESC to see an overview of your slides."),
-      <.br,
-      <.p("You can navigate to the right and down.")
-    ),
-    headerSlide(
-      "My Header",
-      <.h3("Headers everywhere")
-    ),
-    headerSlide(
-      "Enumeration",
-      Enumeration(
-        Item.stable("always show this item"),
-        Item.fadeIn("I fade in"),
-        Item.stable("I am also always here")
-      )
-    ),
-    headerSlide(
-      "Code, so much code",
-      scalaC("""
-        def main(args: Array[String]): Unit = {
-          println("hello, world")
-        }
-      """),
-      scalaFragment("""
-        def moreSideEffects(): Unit = {
-          println("pop in")
-        }
-      """)
-    ),
-    noHeaderSlide(
-      <.h3("Or have a blank slide")
     )
   )
 
@@ -88,14 +54,54 @@ object Slides extends JSApp {
       <.h1("Microservices architecture")
     ),
     headerSlide(
-      "about reveal.js",
+      "microservices",
+      <.img(
+        ^.src := "./img/microservices/microservices_architecture.svg",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      )
+    ),
+    headerSlide(
+      "microservices",
+      <.img(
+        ^.src := "./img/microservices/microservices_architecture_ok.svg",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      )
+    ),
+    headerSlide(
+      "microservices",
+      <.img(
+        ^.src := "./img/microservices/microservices_architecture.svg",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      )
+    ),
+    headerSlide(
+      "microservices",
+      <.img(
+        ^.src := "./img/microservices/microservices_architecture_ko.svg",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      )
+    ),
+    headerSlide(
+      "microservices",
       <.a(
         ^.href := "https://github.com/hakimel/reveal.js/",
         "reveal.js"
       )
     ),
     headerSlide(
-      "about ScalaJS",
+      "microservices",
       <.a(
         ^.href := "https://www.scala-js.org",
         "ScalaJS"
@@ -105,7 +111,7 @@ object Slides extends JSApp {
 
   val solutions = chapter(
     chapterSlide(
-      <.h2("Solutions ?")
+      <.h2("Solutions")
     )
   )
 
@@ -113,19 +119,40 @@ object Slides extends JSApp {
     chapterSlide(
       <.h2("Kleisli?")
     ),
+
     headerSlide(
-      "about reveal.js",
-      <.a(
-        ^.href := "https://github.com/hakimel/reveal.js/",
-        "reveal.js"
+      "reveal.js commands",
+      <.p("Press 'f' to go full-screen and ESC to see an overview of your slides."),
+      <.br,
+      <.p("You can navigate to the right and down.")
+    ),
+    headerSlide(
+      "My Header",
+      <.h3("Headers everywhere")
+    ),
+    headerSlide(
+      "Enumeration",
+      Enumeration(
+        Item.stable("always show this item"),
+        Item.fadeIn("I fade in"),
+        Item.stable("I am also always here")
       )
     ),
     headerSlide(
-      "about ScalaJS",
-      <.a(
-        ^.href := "https://www.scala-js.org",
-        "ScalaJS"
-      )
+      "Code, so much code",
+      scalaC("""
+        def main(args: Array[String]): Unit = {
+          println("hello, world")
+        }
+      """),
+      scalaFragment("""
+        def moreSideEffects(): Unit = {
+          println("pop in")
+        }
+      """)
+    ),
+    noHeaderSlide(
+      <.h3("Or have a blank slide")
     )
   )
 
