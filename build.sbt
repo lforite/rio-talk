@@ -1,3 +1,5 @@
+import scala.sys.process._
+
 val Http4sVersion = "0.20.1"
 val CirceVersion = "0.11.1"
 val ScalaTestVersion = "3.0.5"
@@ -54,6 +56,11 @@ compileSlides := {
   (compile in (slides, Compile)).value
   (fastOptJS in (slides, Compile)).value
   (fullOptJS in (slides, Compile)).value
+}
+
+lazy val openSlides = taskKey[Unit]("Open the slides with the default browser")
+openSlides := {
+  "open slides/index.html" !  
 }
 
 scalacOptions ++= Seq(
