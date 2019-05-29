@@ -159,7 +159,6 @@ object Slides extends JSApp {
             |WARN  [2019-05-29T08:10:09.673Z] - Maximum thread pool size reached 
             |ERROR [2019-05-29T08:11:07.815Z] - Request KO for client 4
             |ERROR [2019-05-29T08:11:07.815Z] - java.lang.JDBCConnectionException: JDBC exception: Connection to database lost
-            |java.lang.Exception: JDBC exception: Connection lost. 💥😱
             |	at org.lforite.service-d.SQLClient.getEntityD(SQLClient.scala:57)
             |	at org.lforite.service-b.UnderlyingSQLClient.executeQuery(UnderlyingSQLClient.scala)
             |WARN  [2019-05-29T08:10:07.816Z] - Maximum thread pool size reached 
@@ -183,10 +182,7 @@ object Slides extends JSApp {
       ),
       headerSlide(
         "microservices",
-        <.a(
-          ^.href := "https://www.scala-js.org",
-          "ScalaJS"
-        )
+        <.h1("🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️🕵️‍♀️🕵️‍♂️🕵️‍♀️🕵️‍♂️️️️")
       )
   )
 
