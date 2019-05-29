@@ -62,7 +62,7 @@ object PresentationUtil {
     )
   )
 
-  private def rawCode(language: String, codeStr: String): TagOf[HTMLElement] =
+  def rawCode(language: String, codeStr: String): TagOf[HTMLElement] =
     <.code(
       ^.cls := language,
       dataTrim,
