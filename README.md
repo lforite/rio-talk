@@ -3,6 +3,8 @@ In modern architectures, the load and responsibilities are shared across many se
 In this presentation, we introduce a well known technique, i.e. using `Kleisli` as the main type to bring context to computations,
 in order to correlate log traces.
 
+[Link to the slides](https://lforite.github.io/rio-talk/slides/#/)
+
 ## Repository structure
 
 ### Slides
