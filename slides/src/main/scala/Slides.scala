@@ -96,7 +96,7 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "microservices",
-      <.blockquote(""""Houston, we've got a problem"""", ^.fontSize.`xx-large`)
+      <.blockquote("«Houston, we've got a problem»", ^.fontSize.`xx-large`)
     ),
     headerSlide(
       "microservices",
@@ -129,14 +129,12 @@ object Slides extends JSApp {
             |INFO  [2019-05-29T08:22:17.514Z] - Request OK
             |INFO  [2019-05-29T08:55:17.948Z] - Request OK
             |INFO  [2019-05-29T09:56:17.287Z] - Request OK
-            |INFO  [2019-05-29T10:57:17.391Z] - Request OK
-            |INFO  [2019-05-29T09:45:17.964Z] - Request OK
-            |ERROR [2019-05-29T13:11:19.064Z] - Unexpected request response: got 500
-            |ERROR [2019-05-29T13:11:19.064Z] - java.lang.HttpRequestException: Unexpected request response
+            |ERROR [2019-05-29T10:11:19.064Z] - Unexpected request response: got 500
+            |ERROR [2019-05-29T10:11:19.064Z] - java.lang.HttpRequestException: Unexpected request response
             |	at org.lforite.service-b.HttpClient.getD(HttpClient.scala:29)
             |	at org.lforite.service-b.UnderlyingHttpClient.get(UnderlyingHttpClient.scala)
-            |INFO  [2019-05-29T13:11:21.415Z] - Request OK
-            |INFO  [2019-05-29T14:11:21.473Z] - Request OK""".stripMargin
+            |INFO  [2019-05-29T11:11:21.415Z] - Request OK
+            |INFO  [2019-05-29T12:11:21.473Z] - Request OK""".stripMargin
         ),
         ^.fontSize.large
       )
@@ -196,6 +194,7 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "tracing requests",
+      <.h3("Implementing a tool"),
       Enumeration(
         Item.stable("Many tools"),
         Item.fadeIn("Specific knowledge"),
@@ -310,7 +309,7 @@ object Slides extends JSApp {
           |      entityB    <- clientB.getB(a.idOfB, cid)
           |      processed  <- somePrivateBusinessLogic(entityB, cid)
           |      result     <- someMoreBusinessLogic(processed, cid)
-          |      _          <- IO(logger.info(s"Successfully processed entity ${a.id} ", cid))
+          |      _          <- logger.info(s"Successfully processed entity ${a.id} ", cid)
           |    } yield result
           |  }
           |}""".stripMargin
@@ -321,11 +320,11 @@ object Slides extends JSApp {
       scalaC(
         """
           |trait Logger {
-          |  def error(msg: String, t: Throwable, cid: CorrelationId): Unit
-          |  def info(msg: String, cid: CorrelationId): Unit = {
-          |    underlyingLogger.info(s"[$cid] $msg")  
+          |  def error(msg: String, t: Throwable, cid: CorrelationId): IO[Unit]
+          |  def info(msg: String, cid: CorrelationId): IO[Unit] = {
+          |    IO[underlyingLogger.info(s"[$cid] $msg")]  
           |  }  
-          |  def debug(msg: String, cid: CorrelationId): Unit
+          |  def debug(msg: String, cid: CorrelationId): IO[Unit]
           |}
         """.stripMargin
       )
@@ -378,11 +377,11 @@ object Slides extends JSApp {
       scalaC(
         """
           |trait Logger {
-          |  def error(msg: String, t: Throwable)(implicit cid: CorrelationId): Unit
-          |  def info(msg: String)(implicit cid: CorrelationId): Unit = {
-          |    underlyingLogger.info(s"[$cid] $msg")  
+          |  def error(msg: String, t: Throwable)(implicit cid: CorrelationId): IO[Unit]
+          |  def info(msg: String)(implicit cid: CorrelationId): IO[Unit] = {
+          |    IO(underlyingLogger.info(s"[$cid] $msg"))  
           |  }
-          |  def debug(msg: String)(implicit cid: CorrelationId): Unit
+          |  def debug(msg: String)(implicit cid: CorrelationId): IO[Unit]
           |}
         """.stripMargin
       )
@@ -394,7 +393,7 @@ object Slides extends JSApp {
         Item.fadeIn("✅ No black magic"),
         Item.fadeIn("✅ Multi-threading"),
         Item.fadeIn("✅ Testing"),
-        Item.fadeIn("❌ Spread everywhere"),
+        Item.fadeIn("✴️ Spread everywhere"),
         Item.fadeIn("❌ Still hard to read"),
         ^.listStyleType.none
       )
@@ -452,7 +451,7 @@ object Slides extends JSApp {
       <.h3("Kleisli operations: create"),
       scalaC(
         """Kleisli { (context: String) => 
-          |    IO(println(s"printing context: $context") 
+          |    IO(println(s"printing context: $context"))
           |}
           |//Kleisli[IO, String, Unit]  
           |""".stripMargin
@@ -484,7 +483,7 @@ object Slides extends JSApp {
         """
           |val context: String = "Kleisli, is that you ?"
           |val kleisli: Kleisli[IO, String, Unit] = Kleisli { (context: String) =>  
-          |    IO(println(s"printing context: $context") 
+          |    IO(println(s"printing context: $context")) 
           |}
           |val io: IO[Unit] = kleisli.run(context)
           |io.unsafeRunSync()
@@ -532,7 +531,7 @@ object Slides extends JSApp {
             |trait Logger {
             |  def error(msg: String, t: Throwable): Kleisli[IO, CorrelationId, Unit]
             |  def info(msg: String): Kleisli[IO, CorrelationId, Unit] = Kleisli { cid =>
-            |    underlyingLogger.info(s"[$cid] $msg")  
+            |    IO(underlyingLogger.info(s"[$cid] $msg"))  
             |  }  
             |  def debug(msg: String): Kleisli[IO, CorrelationId, Unit]
             |}
@@ -572,6 +571,7 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "kleisli in practice",
+      <.h3("Transforming the services"),
       scalaC(
         """
           |trait ServiceA {
@@ -593,24 +593,163 @@ object Slides extends JSApp {
           |    for {
           |      entityB    <- clientB.getB(a.idOfB)
           |      processed  <- somePrivateBusinessLogic(entityB)
+          |      cid        <- Kleisli.ask()
           |      result     <- someMoreBusinessLogic(processed)
           |      _          <- logger.info(s"Successfully processed entity ${a.id}")
           |    } yield result
           |  }
           |}""".stripMargin
       )
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("At the edges of your application"),
+      scalaC(
+        """
+          |case class MyController(serviceA: ServiceA) {
+          |  def postEntityA() = Route { request =>
+          |     val correlationId = request.headers("X-Correlation-Id")
+          |         .map(CorrelationId)
+          |         .getOrElse(CorrelationId.new)
+          |         
+          |     serviceA.createA(request.body.decodeJson[EntityA])
+          |       .run(correlationId)
+          |  }
+          |}
+        """.stripMargin
+      ),
+      scalaFragment(
+        """
+          |case class HttpClientB(httpClient: HttpClient) extends ClientB {
+          |  def getB(bId: EntityBID): Klesli[IO, CorrelationId, EntityB] = Kleisli { cid =>
+          |     httpClient
+          |       .url(s"https://my-b-service-url.com/api/b-entity/bId")
+          |       .headers("X-Correlation-Id" -> cid)
+          |       .get()
+          |  }
+          |}
+        """.stripMargin
+      )
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("Kleisli: summary"),
+      <.ul(
+        Item.fadeIn("✅ No black magic"),
+        Item.fadeIn("✅ Multi-threading"),
+        Item.fadeIn("✅ Testing"),
+        Item.fadeIn("✴️ Looks fairly clean"),
+        Item.fadeIn("✴️ Still hard to read"),
+        ^.listStyleType.none
+      )
+    ),
+    noHeaderSlide(
+      <.h2("«It's not even my final form !»")
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("Introducing RIO"),
+      <.br,
+      scalaC("type RIO[B] = Kleisli[IO, CorrelationId, B]"),
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("Transforming the services with RIO"),
+      scalaC(
+        """
+          |trait ServiceA {
+          |  def createA(a: EntityA): RIO[_]
+          |}
+        """.stripMargin
+      ),
+      scalaFragment(
+        """
+          |trait ClientB {
+          |  def getB(bId: EntityBID): RIO[_]
+          |}
+        """.stripMargin
+      ),
+      scalaFragment(
+        """
+          |case class ServiceA(clientB: ClientB) extends ServiceA {
+          |  override def createA(a: EntityA): RIO[_] = {
+          |    for {
+          |      entityB    <- clientB.getB(a.idOfB)
+          |      processed  <- somePrivateBusinessLogic(entityB)
+          |      result     <- someMoreBusinessLogic(processed)
+          |      _          <- logger.info(s"Successfully processed entity ${a.id}")
+          |    } yield result
+          |  }
+          |}""".stripMargin
+      )
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("RIO: summary"),
+      <.ul(
+        Item.fadeIn("✅ No black magic"),
+        Item.fadeIn("✅ Multi-threading"),
+        Item.fadeIn("✅ Testing"),
+        Item.fadeIn("✅️ Looks fairly clean"),
+        Item.fadeIn("✅️ Still hard to read"),
+        ^.listStyleType.none
+      )
     )
   )
 
   val future = chapter(
     chapterSlide(
-      <.h2("Looking at the future")
+      <.h1("Looking at the future")
+    ),
+    headerSlide(
+      "dotty",
+      <.h3("Contextual functions in Dotty"),
+      scalaC(
+        """
+          |type Traceable[T] = given CorrelationId => T
+        """.stripMargin),
+      scalaFragment("""
+          |implied cid for CorrelationId = ...
+          |
+          |def f(x: Int): Traceable[Int] = ...
+          |
+          |f(2) given ec    // explicit argument
+          |f(2)             // argument is inferred"""
+      )
     )
   )
 
   val summary = chapter(
     chapterSlide(
-      <.h2("Wrap up")
+      <.h1("Wrap up")
+    ),
+    headerSlide(
+      "summary",
+      <.ul(
+        Item.fadeIn("Microservices are hard to debug"),
+        Item.fadeIn("Several techniques to help us"),
+        Item.fadeIn("Functional programming can help us with real world problems")
+      )
+    )
+  )
+  
+  val closingWords = chapter(
+    chapterSlide(
+      <.h2("Crafted with ScalaJS + RevealJs"),
+      <.h3(<.a("https://github.com/lforite/rio-talk", ^.href := "https://github.com/lforite/rio-talk")),
+      <.img(
+        ^.src := "./img/qr-code.png",
+        ^.minHeight := "35%",
+        ^.maxHeight := "35%",
+        ^.minWidth := "35%",
+        ^.maxWidth := "35%"
+      )
+    ),
+    chapterSlide(
+      <.h1("Thank you for your attention")
+    ),
+    chapterSlide(
+      <.h1("Questions ?")
     )
   )
 
@@ -628,7 +767,8 @@ object Slides extends JSApp {
           kleisli,
           kleisliInPractice,
           future,
-          summary
+          summary,
+          closingWords
         )
       )
     )
