@@ -250,19 +250,19 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "tracing requests",
-      <.h3("Thread MDCs (thread local HashMap)"),
+      <.h3("MDCs (thread local HashMap)"),
       scalaC(
         """
           |//storing a correlation id in thread local variables
           |MDC.put("correlationId", Random.alphanumeric.take(8).mkString)
         """.stripMargin
       ),
-      scalaC(
+      scalaFragment(
         """
           | val correlationId = MDC.get("correlationId")
         """.stripMargin
       ),
-      scalaC(
+      scalaFragment(
         """
           |trait Logger {
           |  def error(msg: String, t: Throwable): Unit
@@ -276,7 +276,7 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "tracing requests",
-      <.h3("Thread MDCs: summary"),
+      <.h3("MDCs: summary"),
       <.ul(
         Item.fadeIn("✅ Localised"),
         Item.fadeIn("❌ Does not work with multi-threading"),
@@ -294,14 +294,14 @@ object Slides extends JSApp {
           |}
         """.stripMargin
       ),
-      scalaC(
+      scalaFragment(
         """
           |trait ClientB {
           |  def getB(bId: EntityBID, cid: CorrelationId): IO[_]
           |}
         """.stripMargin
       ),
-      scalaC(
+      scalaFragment(
         """
           |case class ServiceA(clientB: ClientB) extends ServiceA {
           |  override def createA(a: EntityA, cid: CorrelationId): IO[_] = {
@@ -351,14 +351,14 @@ object Slides extends JSApp {
           |}
         """.stripMargin
       ),
-      scalaC(
+      scalaFragment(
         """
           |trait ClientB {
           |  def getB(bId: EntityBID)(implicit cid: CorrelationId): IO[_]
           |}
         """.stripMargin
       ),
-      scalaC(
+      scalaFragment(
         """
           |case class ServiceA(clientB: ClientB, logger: Logger) extends ServiceA {
           |  override def createA(a: EntityA)(implicit cid: CorrelationId): IO[_] = {
