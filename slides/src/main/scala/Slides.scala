@@ -1,5 +1,3 @@
-import java.time.Instant
-
 import PresentationUtil._
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.vdom.html_<^._
@@ -156,7 +154,7 @@ object Slides extends JSApp {
             |ERROR [2019-05-29T08:11:07.815Z] - Request KO for client 4
             |ERROR [2019-05-29T08:11:07.815Z] - java.lang.JDBCConnectionException: JDBC exception: Connection to database lost
             |	at org.lforite.service-d.SQLClient.getEntityD(SQLClient.scala:57)
-            |	at org.lforite.service-b.UnderlyingSQLClient.executeQuery(UnderlyingSQLClient.scala)
+            |	at org.lforite.service-d.UnderlyingSQLClient.executeQuery(UnderlyingSQLClient.scala)
             |WARN  [2019-05-29T08:10:07.816Z] - Maximum thread pool size reached 
             |INFO  [2019-05-29T08:10:08.817Z] - Start processing for entity dfe
             |ERROR [2019-05-29T08:10:07.815Z] - Request ok
@@ -204,7 +202,7 @@ object Slides extends JSApp {
         Item.fadeIn("Time consuming"),
         Item.fadeIn("One more component to maintain"),
         Item.fadeIn("Black magic"),
-        Item.fadeIn("Risky"),
+        Item.fadeIn("Risky")
       )
     ),
     headerSlide(
@@ -246,23 +244,43 @@ object Slides extends JSApp {
             |ERROR [2019-05-29T08:11:07.815Z] [1EgBpH1p] - Request KO for client 4
             |ERROR [2019-05-29T08:11:07.815Z] [1EgBpH1p] - java.lang.JDBCConnectionException: JDBC exception: Connection to database lost
             |	at org.lforite.service-d.SQLClient.getEntityD(SQLClient.scala:57)
-            |	at org.lforite.service-b.UnderlyingSQLClient.executeQuery(UnderlyingSQLClient.scala)""".stripMargin
+            |	at org.lforite.service-d.UnderlyingSQLClient.executeQuery(UnderlyingSQLClient.scala)""".stripMargin
         ),
         ^.fontSize.large
       )
     ),
     headerSlide(
       "tracing requests",
-      <.h3("Use thread MDCs (thread local hashmap)"),
-      <.pre("thread MDC code example"),
+      <.h3("Thread MDCs (thread local HashMap)"),
+      scalaC(
+        """
+          |//storing a correlation id in thread local variables
+          |MDC.put("correlationId", scala.util.Random.alphanumeric.take(8).mkString)
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          | val correlationId = MDC.get("correlationId")
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |trait Logger {
+          |  def error(msg: String, t: Throwable): Unit
+          |  def info(msg: String): Unit = {
+          |    underlyingLogger.info(s"[${MDC.get("correlationId")}] $msg") 
+          |  }
+          |  def debug(msg: String): Unit
+          |}
+        """.stripMargin
+      )
     ),
     headerSlide(
       "tracing requests",
       <.h3("Thread MDCs: summary"),
       <.ul(
-        Item.fadeIn("❌ Multi-threading"),
-        Item.fadeIn("❌ Decorate execution context"),
-        Item.fadeIn("❌ Expensive copy"),
+        Item.fadeIn("✅ Localised"),
+        Item.fadeIn("❌ Does not work with multi-threading"),
         Item.fadeIn("❌ Testing"),
         ^.listStyleType.none
       )
@@ -270,26 +288,114 @@ object Slides extends JSApp {
     headerSlide(
       "tracing requests",
       <.h3("Argument passing"),
-      <.pre("Argument passing code example"),
-      
+      scalaC(
+        """
+          |trait ServiceA {
+          |  def createA(a: EntityA, cid: CorrelationId): Future[_]
+          |}
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |trait ClientB {
+          |  def getB(bId: EntityBID, cid: CorrelationId): Future[_]
+          |}
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |case class ServiceA(clientB: ClientB) extends ServiceA {
+          |  override def createA(a: EntityA, cid: CorrelationId): Future[_] = {
+          |    for {
+          |      entityB    <- clientB.getB(idOfB, cid)
+          |      processed  <- somePrivateBusinessLogic(entityB, cid)
+          |      result     <- someMoreBusinessLogic(processed, cid)
+          |      _          <- Future(logger.info(s"Successfully processed entity ${a.id} ", cid))
+          |    } yield result
+          |  }
+          |}""".stripMargin
+      )
+    ),
+    headerSlide(
+      "tracing requests",
+      scalaC(
+        """
+          |trait Logger {
+          |  def error(msg: String, t: Throwable, cid: CorrelationId): Unit
+          |  def info(msg: String, cid: CorrelationId): Unit = {
+          |    underlyingLogger.info(s"[$cid] $msg")  
+          |  }  
+          |  def debug(msg: String, cid: CorrelationId): Unit
+          |}
+        """.stripMargin
+      )
     ),
     headerSlide(
       "tracing requests",
       <.h3("Argument passing: summary"),
       <.ul(
         Item.fadeIn("✅ No black magic"),
-        Item.fadeIn("✅ No cost"),
+        Item.fadeIn("✅ Multi-threading"),
+        Item.fadeIn("✅ Testing"),
+        Item.fadeIn("❌ Spread everywhere"),
         Item.fadeIn("❌ Hard to read"),
-        Item.fadeIn("❌ Lot of noise"),
         ^.listStyleType.none
       )
     ),
     headerSlide(
       "tracing requests",
       <.h3("Implicit argument passing"),
+      scalaC(
+        """
+          |trait ServiceA {
+          |  def createA(a: EntityA)(implicit cid: CorrelationId): Future[_]
+          |}
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |trait ClientB {
+          |  def getB(bId: EntityBID)(implicit cid: CorrelationId): Future[_]
+          |}
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |case class ServiceA(clientB: ClientB) extends ServiceA {
+          |  override def createA(a: EntityA)(implicit cid: CorrelationId): Future[_] = {
+          |    for {
+          |      entityB    <- clientB.getB(idOfB)
+          |      processed  <- somePrivateBusinessLogic(entityB)
+          |      result     <- someMoreBusinessLogic(processed)
+          |      _          <- Future(logger.info(s"Successfully processed entity ${a.id}"))
+          |    } yield result
+          |  }
+          |}""".stripMargin
+      )
+    ),
+    headerSlide(
+      "tracing requests",
+      scalaC(
+        """
+          |trait Logger {
+          |  def error(msg: String, t: Throwable)(implicit cid: CorrelationId): Unit
+          |  def info(msg: String)(implicit cid: CorrelationId): Unit = {
+          |    underlyingLogger.info(s"[$cid] $msg")  
+          |  }
+          |  def debug(msg: String)(implicit cid: CorrelationId): Unit
+          |}
+        """.stripMargin
+      )
+    ),
+    headerSlide(
+      "tracing requests",
+      <.h3("Implicit argument passing: summary"),
       <.ul(
-        Item.fadeIn("❌ Hard to read"),
-        Item.fadeIn("❌ Lot of noise"),
+        Item.fadeIn("✅ No black magic"),
+        Item.fadeIn("✅ Multi-threading"),
+        Item.fadeIn("✅ Testing"),
+        Item.fadeIn("❌ Spread everywhere"),
+        Item.fadeIn("❌ Still hard to read"),
         ^.listStyleType.none
       )
     )
@@ -335,7 +441,6 @@ object Slides extends JSApp {
     )
   )
 
-
   val future = chapter(
     chapterSlide(
       <.h2("Looking at the future")
@@ -347,7 +452,7 @@ object Slides extends JSApp {
       <.h2("Wrap up")
     )
   )
-  
+
   val Talk = ScalaComponent
     .builder[Unit]("Presentation")
     .renderStatic(
