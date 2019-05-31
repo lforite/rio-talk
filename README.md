@@ -12,7 +12,7 @@ in order to correlate log traces.
 ### Slides
 Contains the presentation, crafted with [`ScalaJS + reveal.js`](https://github.com/pheymann/scala-reveal-js). 
 
-Compile and open the presentation (in your default browser): 
+Compile and open the presentation (in your default browser)
 ```shell
 sbt ";compileSlides; openSlides"
 ```
@@ -20,7 +20,7 @@ sbt ";compileSlides; openSlides"
 ### Http4s example
 Contains the concrete examples on how `Kleisli` can power an `http4s` app
 
-Run the server locally:
+Run the server locally
 ```shell
 todo
 ```
@@ -31,7 +31,7 @@ todo
 ```
 ### Play example
 Contains the concrete examples on how `Kleisli` can power a `Play` app
-Run the server locally:
+Run the server locally
 ```shell
 todo
 ```
