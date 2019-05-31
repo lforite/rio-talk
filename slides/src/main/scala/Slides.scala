@@ -255,7 +255,7 @@ object Slides extends JSApp {
       scalaC(
         """
           |//storing a correlation id in thread local variables
-          |MDC.put("correlationId", scala.util.Random.alphanumeric.take(8).mkString)
+          |MDC.put("correlationId", Random.alphanumeric.take(8).mkString)
         """.stripMargin
       ),
       scalaC(
@@ -307,10 +307,10 @@ object Slides extends JSApp {
           |case class ServiceA(clientB: ClientB) extends ServiceA {
           |  override def createA(a: EntityA, cid: CorrelationId): IO[_] = {
           |    for {
-          |      entityB    <- clientB.getB(idOfB, cid)
+          |      entityB    <- clientB.getB(a.idOfB, cid)
           |      processed  <- somePrivateBusinessLogic(entityB, cid)
           |      result     <- someMoreBusinessLogic(processed, cid)
-          |      _          <- Future(logger.info(s"Successfully processed entity ${a.id} ", cid))
+          |      _          <- IO(logger.info(s"Successfully processed entity ${a.id} ", cid))
           |    } yield result
           |  }
           |}""".stripMargin
@@ -361,13 +361,13 @@ object Slides extends JSApp {
       ),
       scalaC(
         """
-          |case class ServiceA(clientB: ClientB) extends ServiceA {
+          |case class ServiceA(clientB: ClientB, logger: Logger) extends ServiceA {
           |  override def createA(a: EntityA)(implicit cid: CorrelationId): IO[_] = {
           |    for {
-          |      entityB    <- clientB.getB(idOfB)
+          |      entityB    <- clientB.getB(a.idOfB)
           |      processed  <- somePrivateBusinessLogic(entityB)
           |      result     <- someMoreBusinessLogic(processed)
-          |      _          <- Future(logger.info(s"Successfully processed entity ${a.id}"))
+          |      _          <- logger.info(s"Successfully processed entity ${a.id}")
           |    } yield result
           |  }
           |}""".stripMargin
@@ -459,11 +459,13 @@ object Slides extends JSApp {
       ),
       <.pre(
         rawCode(
-          "Scala","""
+          "Scala",
+          """
           |Kleisli.liftF(IO(1 + 1))
           |//Kleisli[IO, _, Int]
           |""".stripMargin),
-        ^.`class` := "fragment fade-in"),
+        ^.`class` := "fragment fade-in"
+      ),
       <.pre(
         rawCode(
           "Scala",
@@ -492,17 +494,110 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "kleisli",
-      <.h3("Kleisli operations: as"),
+      <.h3("Kleisli operations: ask"),
       scalaC(
         """
           |val context: String = "Kleisli, is that you ?"
-          |val kleisli: Kleisli[IO, String, Unit] = Kleisli { (context: String) =>  
-          |    IO(println(s"printing context: $context") 
-          |}
-          |val io: IO[Unit] = kleisli.run(context)
+          |val kleisli: Kleisli[IO, String, String] = Kleisli.ask()
+          |val io: IO[String] = kleisli.run(context)
           |io.unsafeRunSync()
-          |//"printing context: Kleisli, is that you?
+          |// returns string "Kleisli, is that you?
         """.stripMargin
+      )
+    )
+  )
+
+  val kleisliInPractice = chapter(
+    chapterSlide(
+      <.h1("Kleisli in practice")
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("Transforming the Logger"),
+      scalaC(
+        """
+            |trait Logger {
+            |  def error(msg: String, t: Throwable)(implicit cid: CorrelationId): IO[Unit]
+            |  def info(msg: String)(implicit cid: CorrelationId): IO[Unit] = {
+            |    IO(underlyingLogger.info(s"[$cid] $msg"))  
+            |  }  
+            |  def debug(msg: String)(implicit cid: CorrelationId): IO[Unit]
+            |}
+          """.stripMargin
+      ),
+      <.br
+      ,
+      scalaFragment(
+        """
+            |trait Logger {
+            |  def error(msg: String, t: Throwable): Kleisli[IO, CorrelationId, Unit]
+            |  def info(msg: String): Kleisli[IO, CorrelationId, Unit] = Kleisli { cid =>
+            |    underlyingLogger.info(s"[$cid] $msg")  
+            |  }  
+            |  def debug(msg: String): Kleisli[IO, CorrelationId, Unit]
+            |}
+          """.stripMargin
+      )
+    ),
+    headerSlide(
+      "kleisli in practice",
+      <.h3("Transforming the services"),
+      scalaC(
+        """
+          |trait ServiceA {
+          |  def createA(a: EntityA)(implicit cid: CorrelationId): IO[_]
+          |}
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |trait ClientB {
+          |  def getB(bId: EntityBID)(implicit cid: CorrelationId): IO[_]
+          |}
+        """.stripMargin
+      ),
+      scalaC(
+        """
+          |case class ServiceA(clientB: ClientB, logger: Logger) extends ServiceA {
+          |  override def createA(a: EntityA)(implicit cid: CorrelationId): IO[_] = {
+          |    for {
+          |      entityB    <- clientB.getB(a.idOfB)
+          |      processed  <- somePrivateBusinessLogic(entityB)
+          |      result     <- someMoreBusinessLogic(processed)
+          |      _          <- logger.info(s"Successfully processed entity ${a.id}")
+          |    } yield result
+          |  }
+          |}""".stripMargin
+      )
+    ),
+    headerSlide(
+      "kleisli in practice",
+      scalaC(
+        """
+          |trait ServiceA {
+          |  def createA(a: EntityA): Klesli[IO, CorrelationId, _]
+          |}
+        """.stripMargin
+      ),
+      scalaFragment(
+        """
+          |trait ClientB {
+          |  def getB(bId: EntityBID): Klesli[IO, CorrelationId, _]
+          |}
+        """.stripMargin
+      ),
+      scalaFragment(
+        """
+          |case class ServiceA(clientB: ClientB) extends ServiceA {
+          |  override def createA(a: EntityA): Klesli[IO, CorrelationId, _] = {
+          |    for {
+          |      entityB    <- clientB.getB(a.idOfB)
+          |      processed  <- somePrivateBusinessLogic(entityB)
+          |      result     <- someMoreBusinessLogic(processed)
+          |      _          <- logger.info(s"Successfully processed entity ${a.id}")
+          |    } yield result
+          |  }
+          |}""".stripMargin
       )
     )
   )
@@ -531,6 +626,7 @@ object Slides extends JSApp {
           microservicesArchitecture,
           solutions,
           kleisli,
+          kleisliInPractice,
           future,
           summary
         )
