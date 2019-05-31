@@ -207,7 +207,7 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "tracing requests",
-      <.h2("Just code ?"),
+      <.h2("Just code"),
       <.p("Add a correlation id to all your log traces")
     ),
     headerSlide(
@@ -291,21 +291,21 @@ object Slides extends JSApp {
       scalaC(
         """
           |trait ServiceA {
-          |  def createA(a: EntityA, cid: CorrelationId): Future[_]
+          |  def createA(a: EntityA, cid: CorrelationId): IO[_]
           |}
         """.stripMargin
       ),
       scalaC(
         """
           |trait ClientB {
-          |  def getB(bId: EntityBID, cid: CorrelationId): Future[_]
+          |  def getB(bId: EntityBID, cid: CorrelationId): IO[_]
           |}
         """.stripMargin
       ),
       scalaC(
         """
           |case class ServiceA(clientB: ClientB) extends ServiceA {
-          |  override def createA(a: EntityA, cid: CorrelationId): Future[_] = {
+          |  override def createA(a: EntityA, cid: CorrelationId): IO[_] = {
           |    for {
           |      entityB    <- clientB.getB(idOfB, cid)
           |      processed  <- somePrivateBusinessLogic(entityB, cid)
@@ -348,21 +348,21 @@ object Slides extends JSApp {
       scalaC(
         """
           |trait ServiceA {
-          |  def createA(a: EntityA)(implicit cid: CorrelationId): Future[_]
+          |  def createA(a: EntityA)(implicit cid: CorrelationId): IO[_]
           |}
         """.stripMargin
       ),
       scalaC(
         """
           |trait ClientB {
-          |  def getB(bId: EntityBID)(implicit cid: CorrelationId): Future[_]
+          |  def getB(bId: EntityBID)(implicit cid: CorrelationId): IO[_]
           |}
         """.stripMargin
       ),
       scalaC(
         """
           |case class ServiceA(clientB: ClientB) extends ServiceA {
-          |  override def createA(a: EntityA)(implicit cid: CorrelationId): Future[_] = {
+          |  override def createA(a: EntityA)(implicit cid: CorrelationId): IO[_] = {
           |    for {
           |      entityB    <- clientB.getB(idOfB)
           |      processed  <- somePrivateBusinessLogic(entityB)
@@ -449,10 +449,61 @@ object Slides extends JSApp {
     ),
     headerSlide(
       "kleisli",
-      <.h3("Kleisli operations"),
-      scalaC("create"),
-      scalaC("run"),
-      scalaC("ask")
+      <.h3("Kleisli operations: create"),
+      scalaC(
+        """Kleisli { (context: String) => 
+          |    IO(println(s"printing context: $context") 
+          |}
+          |//Kleisli[IO, String, Unit]  
+          |""".stripMargin
+      ),
+      <.pre(
+        rawCode(
+          "Scala","""
+          |Kleisli.liftF(IO(1 + 1))
+          |//Kleisli[IO, _, Int]
+          |""".stripMargin),
+        ^.`class` := "fragment fade-in"),
+      <.pre(
+        rawCode(
+          "Scala",
+          """
+          |Kleisli.pure("This string is lifted to Kleisli")
+          |//Kleisli[IO, _, String]
+          |""".stripMargin
+        ),
+        ^.`class` := "fragment fade-in"
+      )
+    ),
+    headerSlide(
+      "kleisli",
+      <.h3("Kleisli operations: run"),
+      scalaC(
+        """
+          |val context: String = "Kleisli, is that you ?"
+          |val kleisli: Kleisli[IO, String, Unit] = Kleisli { (context: String) =>  
+          |    IO(println(s"printing context: $context") 
+          |}
+          |val io: IO[Unit] = kleisli.run(context)
+          |io.unsafeRunSync()
+          |//"printing context: Kleisli, is that you?
+        """.stripMargin
+      )
+    ),
+    headerSlide(
+      "kleisli",
+      <.h3("Kleisli operations: as"),
+      scalaC(
+        """
+          |val context: String = "Kleisli, is that you ?"
+          |val kleisli: Kleisli[IO, String, Unit] = Kleisli { (context: String) =>  
+          |    IO(println(s"printing context: $context") 
+          |}
+          |val io: IO[Unit] = kleisli.run(context)
+          |io.unsafeRunSync()
+          |//"printing context: Kleisli, is that you?
+        """.stripMargin
+      )
     )
   )
 
