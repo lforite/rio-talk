@@ -1,9 +1,11 @@
 # Request tracing in microservices architecture - A Kleisli tale
+[![Build Status](https://travis-ci.org/lforite/rio-talk.svg?branch=master)](https://travis-ci.org/lforite/rio-talk)
+
 In modern architectures, the load and responsibilities are shared across many services. It can be hard to debug, at scale.
 In this presentation, we introduce a well known technique, i.e. using `Kleisli` as the main type to bring context to computations,
 in order to correlate log traces.
 
-[Link to the slides](https://lforite.github.io/rio-talk/slides/#/)
+[Link to the slides](https://lforite.github.io/rio-talk/slides/index.html)
 
 ## Repository structure
 

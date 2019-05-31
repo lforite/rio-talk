@@ -524,8 +524,7 @@ object Slides extends JSApp {
             |}
           """.stripMargin
       ),
-      <.br
-      ,
+      <.br,
       scalaFragment(
         """
             |trait Logger {
@@ -650,7 +649,7 @@ object Slides extends JSApp {
       "kleisli in practice",
       <.h3("Introducing RIO"),
       <.br,
-      scalaC("type RIO[B] = Kleisli[IO, CorrelationId, B]"),
+      scalaC("type RIO[B] = Kleisli[IO, CorrelationId, B]")
     ),
     headerSlide(
       "kleisli in practice",
@@ -704,11 +703,11 @@ object Slides extends JSApp {
     headerSlide(
       "dotty",
       <.h3("Contextual functions in Dotty"),
-      scalaC(
-        """
+      scalaC("""
           |type Traceable[T] = given CorrelationId => T
         """.stripMargin),
-      scalaFragment("""
+      scalaFragment(
+        """
           |implied cid for CorrelationId = ...
           |
           |def f(x: Int): Traceable[Int] = ...
@@ -732,7 +731,7 @@ object Slides extends JSApp {
       )
     )
   )
-  
+
   val closingWords = chapter(
     chapterSlide(
       <.h2("Crafted with ScalaJS + RevealJs"),
