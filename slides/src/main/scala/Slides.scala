@@ -403,41 +403,56 @@ object Slides extends JSApp {
 
   val kleisli = chapter(
     chapterSlide(
-      <.h2("Kleisli?")
+      <.h1("Kleisli")
     ),
     headerSlide(
-      "reveal.js commands",
-      <.p("Press 'f' to go full-screen and ESC to see an overview of your slides."),
-      <.br,
-      <.p("You can navigate to the right and down.")
-    ),
-    headerSlide(
-      "My Header",
-      <.h3("Headers everywhere")
-    ),
-    headerSlide(
-      "Enumeration",
-      Enumeration(
-        Item.stable("always show this item"),
-        Item.fadeIn("I fade in"),
-        Item.stable("I am also always here")
+      "kleisli",
+      <.img(
+        ^.src := "./img/kleisli.jpeg",
+        ^.minHeight := "50%",
+        ^.maxHeight := "50%",
+        ^.minWidth := "50%",
+        ^.maxWidth := "50%"
+      ),
+      <.a(
+        ^.href := "https://en.wikipedia.org/wiki/Heinrich_Kleisli",
+        "https://en.wikipedia.org/wiki/Heinrich_Kleisli"
       )
     ),
     headerSlide(
-      "Code, so much code",
-      scalaC("""
-        def main(args: Array[String]): Unit = {
-          println("hello, world")
-        }
-      """),
-      scalaFragment("""
-        def moreSideEffects(): Unit = {
-          println("pop in")
-        }
-      """)
+      "kleisli",
+      <.pre(
+        rawCode(
+          "Scala",
+          """
+          |case class Kleisli[F[_], -A, B](run: A => F[B])
+        """.stripMargin),
+        ^.fontSize.`xx-large`
+      )
     ),
-    noHeaderSlide(
-      <.h3("Or have a blank slide")
+    headerSlide(
+      "kleisli",
+      <.h3("Kleisli properties"),
+      <.p("If ", f_(), " is a ", keyword("Functor"), " then ", kleisli_f_(), " is also a ", keyword("Functor")),
+      <.p(
+        "If ",
+        f_(),
+        " is an ",
+        keyword("Applicative"),
+        " then ",
+        kleisli_f_(),
+        " is also an ",
+        keyword("Applicative"),
+        ^.`class` := "fragment fade-in"
+      ),
+      <.p("If ", f_(), " is a ", keyword("Monad"), " then ", kleisli_f_(), " is also a ", keyword("Monad"), ^.`class` := "fragment fade-in")
+    ),
+    headerSlide(
+      "kleisli",
+      <.h3("Kleisli operations"),
+      scalaC("create"),
+      scalaC("run"),
+      scalaC("ask")
     )
   )
 

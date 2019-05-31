@@ -1,8 +1,8 @@
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react.vdom.TagOf
+import japgolly.scalajs.react.vdom.html_<^._
 import org.scalajs.dom
-import dom.raw.HTMLElement
+import org.scalajs.dom.html.Span
+import org.scalajs.dom.raw.HTMLElement
 
 object PresentationUtil {
 
@@ -100,4 +100,22 @@ object PresentationUtil {
         (head +: tail): _*
       )
   }
+
+  def f_(): VdomTagOf[Span] =
+    <.span(
+      <.span("F", ^.`class` := "hljs-type"),
+      "[_]"
+    )
+
+  def kleisli_f_(): VdomTagOf[Span] =
+    <.span(
+      <.span("Kleisli", ^.`class` := "hljs-type"),
+      "[",
+      f_(),
+      ", _, _]",
+      ^.`class` := "hljs-class"
+    )
+
+  def keyword(word: String): VdomTagOf[Span] =
+    <.span(word, ^.`class` := "hljs-keyword")
 }
