@@ -25,3 +25,5 @@ scm-source.json
 .metals/
 .bloop/
 project/.bloop/
+
+.DS_Store
