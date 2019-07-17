@@ -8,4 +8,4 @@ GET     /_health                    controllers.HealthCheckController.get
 
 POST    /users                      controllers.UserController.post
 
-GET     /users/{id}                 controllers.UserController.get(id: String)
+GET     /users/:id                  controllers.UserController.get(id: String)
