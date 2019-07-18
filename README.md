@@ -17,6 +17,30 @@ Compile and open the presentation (in your default browser)
 sbt ";compileSlides; openSlides"
 ```
 
+### Play example
+Contains the concrete examples on how `Kleisli` can power a `Play` app
+Run the server locally
+```shell
+sbt "; project play; run"
+```
+Execute some requests and check out the logs
+```shell
+# create a new user
+curl -X POST -v -d '{
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@test.com"
+    }' "http://localhost:9000/users"
+    
+# retrieve it
+curl -X GET -v -H "http://localhost:9000/users/{id}"
+```
+
+Run the tests:
+```shell
+sbt "; project play; test"
+```
+
 ### Http4s example
 Contains the concrete examples on how `Kleisli` can power an `http4s` app
 
@@ -25,16 +49,6 @@ Run the server locally
 todo
 ```
 
-Run the tests:
-```shell
-todo
-```
-### Play example
-Contains the concrete examples on how `Kleisli` can power a `Play` app
-Run the server locally
-```shell
-todo
-```
 Run the tests:
 ```shell
 todo
