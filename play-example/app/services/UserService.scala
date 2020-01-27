@@ -27,7 +27,7 @@ class UserServiceImpl @Inject()(
       newId <- idGeneratorService.newId()
       user  <- RIO.pure(User(UserId(newId), createUser.firstName, createUser.lastName, createUser.email))
       _     <- userRepository.create(user)
-      _     <- notificationClient.sendNotification()
+      _     <- notificationClient.sendNotification(user.email, s"👋 ${user.email.value}, welcome !")
       _     <- CustomLogger.info(s"Successfully created user with id $newId")
     } yield user
 

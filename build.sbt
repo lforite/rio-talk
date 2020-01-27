@@ -13,6 +13,7 @@ lazy val root = (project in file("."))
   .settings()
   .aggregate(
     `http4s`,
+    `play`,
     `slides`
   )
 
