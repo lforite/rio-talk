@@ -46,10 +46,18 @@ Contains the concrete examples on how `Kleisli` can power an `http4s` app
 
 Run the server locally
 ```shell
-todo
+sbt "; project htt4ps; run"
 ```
 
-Run the tests:
+Execute some requests and check out the logs
 ```shell
-todo
+# create a new user
+curl -X POST -v -d '{
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@test.com"
+    }' "http://localhost:9000/users"
+    
+# retrieve it
+curl -X GET -v -H "http://localhost:9000/users/{id}"
 ```
