@@ -1,23 +1,23 @@
 package rio.services
 
-import rio.RIO
 import cats.implicits._
+import rio.RIO
 import rio.models.{CreateNotification, Notification, NotificationId}
+import rio.repositories.NotificationRepository
 
 trait NotificationService {
   def create(create: CreateNotification): RIO[Notification]
 }
 
-case class NotificationServiceImpl() extends NotificationService {
+case class NotificationServiceImpl(idGeneratorService: IdGeneratorService, repository: NotificationRepository) extends NotificationService {
   override def create(create: CreateNotification): RIO[Notification] =
     (for {
-      notificationId <- generateId()
+      notificationId <- idGeneratorService.newId().map(NotificationId)
       notification = Notification(notificationId, create.email, create.content)
+      _ <- repository.create(notification)
       _ <- send(notification)
-    } yield notification) <* CustomLogger.info("Notification successfully sent")
-
-  private def generateId(): RIO[NotificationId] =
-    RIO.pure(NotificationId(scala.util.Random.alphanumeric.take(25).mkString))
+    } yield notification) <*
+      CustomLogger.info(s"Notification successfully sent")
 
   private def send(notification: Notification): RIO[Unit] =
     RIO.unit

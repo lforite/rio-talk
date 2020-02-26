@@ -23,17 +23,17 @@ Run the server locally
 ```shell
 sbt "; project play; run"
 ```
-Execute some requests and check out the logs
+Execute some requests and check out the logs:
 ```shell
-# create a new user
+# create a new user (requires the http4s app running)
 curl -X POST -v -d '{
       "first_name": "John",
       "last_name": "Doe",
       "email": "john.doe@test.com"
-    }' "http://localhost:9000/users"
+    }' "http://localhost:9000/users" -H "Content-Type: application/json"
     
 # retrieve it
-curl -X GET -v -H "http://localhost:9000/users/{id}"
+curl -X GET -v"http://localhost:9000/users/{id}"
 ```
 
 Run the tests:
@@ -53,9 +53,8 @@ Execute some requests and check out the logs
 ```shell
 # create a new user
 curl -X POST -v -d '{
-      "first_name": "John",
-      "last_name": "Doe",
-      "email": "john.doe@test.com"
+      "email": "john.doe@test.com",
+      "content": "Hello John !"
     }' "http://localhost:9000/users"
     
 # retrieve it

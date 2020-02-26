@@ -10,7 +10,8 @@ import org.http4s.util.CaseInsensitiveString
 import org.http4s.{HttpApp, Request, server}
 import rio.api.NotificationApi
 import rio.models.{CorrelationId, RequestContext}
-import rio.services.NotificationServiceImpl
+import rio.repositories.PostgresNotificationRepository
+import rio.services.{NotificationServiceImpl, ScalaRandomIdGeneratorService}
 
 object NotificationApp extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
@@ -19,11 +20,11 @@ object NotificationApp extends IOApp {
   object RIOExampleApp {
 
     def httpApp(): HttpApp[IO] = {
-      val notificationService = NotificationServiceImpl()
+      val notificationRepository = PostgresNotificationRepository()
+      val idGeneratorService = ScalaRandomIdGeneratorService()
+      val notificationService = NotificationServiceImpl(idGeneratorService, notificationRepository)
       val notificationApi     = NotificationApi(notificationService)
-
-      val middleware = server.AuthMiddleware(MyMiddle.withContext)
-
+      val middleware = server.AuthMiddleware(CorrelationIdMiddleware.withContext)
       val services = middleware(notificationApi.routes)
 
       Router
@@ -33,15 +34,11 @@ object NotificationApp extends IOApp {
         .orNotFound
     }
 
-    def resource: Resource[IO, Server[IO]] = {
-      val app = httpApp()
-      for {
-        server <- BlazeServerBuilder[IO].bindHttp(8081).withHttpApp(app).resource
-      } yield server
-    }
+    def resource: Resource[IO, Server[IO]] =
+      BlazeServerBuilder[IO].bindHttp(8081).withHttpApp(httpApp()).resource
   }
 
-  object MyMiddle {
+  object CorrelationIdMiddleware {
 
     private def generateCorrelationId(): CorrelationId = {
       val id = scala.util.Random.alphanumeric.take(10).mkString
@@ -55,7 +52,6 @@ object NotificationApp extends IOApp {
       val correlationId = getCorrelationId(request).getOrElse(generateCorrelationId())
       OptionT.pure(RequestContext(correlationId))
     }
-
   }
 
 }
